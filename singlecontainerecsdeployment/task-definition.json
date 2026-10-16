@@ -1,0 +1,37 @@
+{
+  "family": "flask-ecs-demo-task",
+  "networkMode": "awsvpc",
+  "requiresCompatibilities": ["FARGATE"],
+  "cpu": "256",
+  "memory": "512",
+  "executionRoleArn": "arn:aws:iam::<ACCOUNT_ID>:role/ecsTaskExecutionRole",
+  "containerDefinitions": [
+    {
+      "name": "flask-app",
+      "image": "<ACCOUNT_ID>.dkr.ecr.<REGION>.amazonaws.com/flask-ecs-demo:v1",
+      "essential": true,
+      "portMappings": [
+        { "containerPort": 5000, "protocol": "tcp" }
+      ],
+      "environment": [
+        { "name": "APP_VERSION", "value": "v1" }
+      ],
+      "healthCheck": {
+        "command": ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:5000/health')\" || exit 1"],
+        "interval": 30,
+        "timeout": 5,
+        "retries": 3,
+        "startPeriod": 10
+      },
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/flask-ecs-demo",
+          "awslogs-region": "<REGION>",
+          "awslogs-stream-prefix": "ecs",
+          "awslogs-create-group": "true"
+        }
+      }
+    }
+  ]
+}
